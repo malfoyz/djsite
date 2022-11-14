@@ -95,19 +95,16 @@ def show_post(request: HttpRequest, post_slug) -> HttpResponse:
     )
 
 
-def show_category(request: HttpRequest, cat_id: int) -> HttpResponse:
+def show_category(request: HttpRequest, cat_slug) -> HttpResponse:
     """Обработчик страницы категории"""
 
-    #posts = Women.objects.filter(cat_id=cat_id)    # фильтрация постов
-
-    #if len(posts) == 0:
-    #    raise Http404()           # перенаправит на функцию pageNotFound
+    category = get_object_or_404(Category, slug=cat_slug)
 
     context = {
         #'posts': posts,
         'menu': menu, 
         'title': 'Отображение по рубрикам',
-        'cat_selected': cat_id,
+        'cat_selected': category.id,
     }
 
     return render(
