@@ -21,12 +21,12 @@ def show_categories(sort=None, cat_selected=0):
     return {"cats": cats, "cat_selected": cat_selected}
 
 
-@register.simple_tag()
-def get_posts(cat_selected=0):
-    if cat_selected == 0:
-        return Women.objects.all()
-    else:
-        return Women.objects.filter(cat_id=cat_selected)
+# @register.simple_tag()
+# def get_posts(cat_selected=0):
+#     if cat_selected == 0:
+#         return Women.objects.all()
+#     else:
+#         return Women.objects.filter(cat_id=cat_selected)
 
 
 
