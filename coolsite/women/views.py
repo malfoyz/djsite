@@ -3,31 +3,23 @@ from django.http import (
     HttpResponse, 
     HttpResponseNotFound, 
 )
-from django.shortcuts import (
-    render, 
-    redirect,
-    get_object_or_404,
-)
+from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import (
     ListView,
     DetailView,
     CreateView,
 )
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 from .forms import *
 from .models import *
+from .utils import *
 
 
-menu = [{'title': 'О сайте', 'url_name': 'about'},
-        {'title': 'Добавить статью', 'url_name': 'add_page'}, 
-        {'title': 'Обратная связь', 'url_name': 'contact'}, 
-        {'title': 'Войти', 'url_name': 'login'}
-]
-
-
-class WomenHome(ListView):
-    """Класс-обработчик главной страницы"""
+class WomenHome(DataMixin, ListView):
+    """Класс представления главной страницы"""
 
     model = Women                                    # выбирает все записи из таблицы в виде списка
     template_name = 'women/index.html'
@@ -40,11 +32,9 @@ class WomenHome(ListView):
         """
 
         context = super().get_context_data(**kwargs)              # получение уже существующего контекста ListView
-        context['menu'] = menu                                    # создание контекста
-        context['title'] = 'Главная страница'
-        context['cat_selected'] = 0
+        c_def = self.get_user_context(title="Главная страница")
 
-        return context
+        return context | c_def
 
     def get_queryset(self):
         """Функция, фильтрующая объекты"""
@@ -70,26 +60,27 @@ class WomenHome(ListView):
 #         context=context,
 #     )
 
-
+@login_required
 def about(request: HttpRequest) -> HttpResponse:
     """Обработчик страницы - О сайте"""
 
     return render(request, 'women/about.html', {'menu': menu, 'title': 'О сайте'})
 
 
-class AddPage(CreateView):
-    """Класс-обработчик страницы с добавлением поста"""
+class AddPage(LoginRequiredMixin, DataMixin, CreateView):
+    """Класс представления страницы с добавлением поста"""
 
     form_class = AddPostForm
     template_name = 'women/addpage.html'
     success_url = reverse_lazy('home')
+    login_url = reverse_lazy('home')
+    raise_exception = True
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context =  super().get_context_data(**kwargs)
-        context['title'] = 'Добавление статьи'
-        context['menu'] = menu
+        c_def = self.get_user_context(title='Добавление статьи')
 
-        return context
+        return context | c_def
 
 
 
@@ -155,8 +146,8 @@ def pageNotFound(request: HttpRequest, exception):
 #         context=context,
 #     )
 
-class ShowPost(DetailView):
-    """Класс-обработчик отображения определенного поста"""
+class ShowPost(DataMixin, DetailView):
+    """Класс представления отображения определенного поста"""
 
     model = Women
     template_name = 'women/post.html'
@@ -166,15 +157,14 @@ class ShowPost(DetailView):
     def get_context_data(self, *, object_list=None, **kwargs):
 
         context = super().get_context_data(**kwargs)
-        context['title'] = context['post']
-        context['menu'] = menu
+        c_def = self.get_user_context(title=context['post'])
 
-        return context
-
+        return context | c_def
 
 
-class WomenCategory(ListView):
-    """Класс-обработчик отображения страницы определенной категории"""
+
+class WomenCategory(DataMixin, ListView):
+    """Класс представления отображения страницы определенной категории"""
 
     model = Women
     template_name = 'women/index.html'
@@ -191,11 +181,10 @@ class WomenCategory(ListView):
         """
 
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Категория - ' + str(context['posts'][0].cat)
-        context['menu'] = menu
-        context['cat_selected'] = context['posts'][0].cat_id
+        c_def = self.get_user_context(title='Категория - ' + str(context['posts'][0].cat),
+                                      cat_selected=context['posts'][0].cat_id)
 
-        return context
+        return context | c_def
 
 
 

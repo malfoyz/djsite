@@ -35,7 +35,7 @@ class Women(models.Model):
         verbose_name='Публикация',
     )
     cat = models.ForeignKey(
-        to='Category', 
+        to='Category',
         on_delete=models.PROTECT,
         verbose_name='Категории',
     )
@@ -44,19 +44,21 @@ class Women(models.Model):
         return self.title
 
     def get_absolute_url(self) -> str:
+        """Функция формирования ссылки со слагом"""
+
         return reverse('post', kwargs={'post_slug': self.slug})
 
-    class Meta:
+    class Meta: 
         verbose_name = "Известные женщины"
         verbose_name_plural = "Известные женщины"
-        ordering = ['-time_create', 'title']
+        #ordering = ['-time_create', 'title']
 
 
 class Category(models.Model):
     """Модель категории"""
 
     name = models.CharField(
-        max_length=100, 
+        max_length=100,
         db_index=True,
         verbose_name='Категория'
     )
@@ -71,6 +73,8 @@ class Category(models.Model):
         return self.name
 
     def get_absolute_url(self) -> str:
+        """Функция формирования ссылки со слагом"""
+
         return reverse('category', kwargs={'cat_slug': self.slug})
 
     class Meta:
