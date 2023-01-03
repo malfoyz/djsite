@@ -3,7 +3,7 @@ from django.http import (
     HttpResponse, 
     HttpResponseNotFound, 
 )
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import (
     ListView,
@@ -11,7 +11,12 @@ from django.views.generic import (
     CreateView,
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
+from django.contrib import auth
+from django.contrib.auth import (
+    login, 
+    logout,
+)
 from django.core.paginator import Paginator
 
 from .forms import *
@@ -211,3 +216,51 @@ class WomenCategory(DataMixin, ListView):
 #         template_name='women/index.html',
 #         context=context,
 #     )
+
+
+class RegisterUser(DataMixin, CreateView):
+    """Класс представления регистрации на сайте"""
+
+    form_class = RegisterUserForm
+    template_name = 'women/register.html'
+    success_url = reverse_lazy('login')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Регистрация')
+        
+        return context | c_def
+
+    def form_valid(self, form):
+        """Вызывается при успешной проверке формы регистрации"""
+
+        user = form.save()            # добавляем пользователя в БД
+        auth.login(self.request, user)     # авторизовываем пользователя
+        return redirect('home')
+
+
+class LoginUser(DataMixin, LoginView):
+    """Класс представления авторизации на сайте"""
+
+    form_class = AuthenticationForm
+    template_name = 'women/login.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Авторизация')
+        
+        return context | c_def
+
+    def get_success_url(self):
+        """Функция перенаправления на страницу home в случае успешного ввода логина и пароля"""
+
+        return reverse_lazy('home')
+
+
+def logout_user(request):
+    """Обработчик выхода"""
+
+    logout(request)
+    return redirect('login')
