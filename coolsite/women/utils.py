@@ -11,7 +11,7 @@ menu  = [{'title': 'О сайте', 'url_name': 'about'},
 class DataMixin:
     """Миксин"""
 
-    paginate_by = 2
+    paginate_by = 20
 
     def get_user_context(self, **kwargs): 
         context = kwargs
