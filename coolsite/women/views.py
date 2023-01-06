@@ -193,7 +193,7 @@ class WomenCategory(DataMixin, ListView):
 
         context = super().get_context_data(**kwargs)
         c = Category.objects.get(slug=self.kwargs['cat_slug'])
-        c_def = self.get_user_context(title='Категория - ' + str(с.name),
+        c_def = self.get_user_context(title='Категория - ' + str(c.name),
                                       cat_selected=c.pk)
 
         return context | c_def
